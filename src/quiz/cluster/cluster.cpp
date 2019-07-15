@@ -18,7 +18,7 @@ pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom)
   	viewer->setCameraPosition(0, 0, zoom, 0, 1, 0);
   	viewer->addCoordinateSystem (1.0);
 
-  	viewer->addCube(window.x_min, window.x_max, window.y_min, window.y_max, 0, 0, 1, 1, 1, "window");
+  	viewer->addCube(window.x_min, window.x_max, window.y_min, window.y_max, 0, 0, 0.8, 0.8, 0.8, "window");
   	return viewer;
 }
 
@@ -75,12 +75,37 @@ void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Bo
 
 }
 
+
+void pointsInProximity(const std::vector<std::vector<float>>& points, int point, KdTree* tree, float distanceTol, std::vector<int>& cluster, std::vector<bool>& point_processed) {
+
+    //Get nearby points (including this point itself)
+    std::vector<int> nearby_points = tree->search(points[point], distanceTol);
+    for(int index : nearby_points) {
+        // Add point to the cluster and mark it as processed
+        point_processed[point] = true;
+        cluster.push_back(point);
+
+        // If this point has not been processed yet, find all points in proximity
+        if(!point_processed[index]) {
+            pointsInProximity(points,index,tree,distanceTol,cluster,point_processed);
+        }
+    }
+
+}
+
 std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
 {
 
-	// TODO: Fill out this function to return list of indices for each cluster
-
 	std::vector<std::vector<int>> clusters;
+	std::vector<bool> point_processed(points.size(),false);
+
+	for(unsigned int i=0; i<points.size(); ++i) {
+	    if(!point_processed[i]) {
+	        std::vector<int> cluster;
+            pointsInProximity(points, i, tree, distanceTol, cluster, point_processed);
+            clusters.push_back(cluster);
+	    }
+	}
  
 	return clusters;
 
@@ -105,11 +130,11 @@ int main ()
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData(points);
 
 	KdTree* tree = new KdTree;
-  
-    for (int i=0; i<points.size(); i++) 
-    	tree->insert(points[i],i); 
 
-  	int it = 0;
+    for (int i=0; i<points.size(); i++)
+    	tree->insert(points[i],i);
+
+    int it = 0;
   	render2DTree(tree->root,viewer,window, it);
   
   	std::cout << "Test Search" << std::endl;
