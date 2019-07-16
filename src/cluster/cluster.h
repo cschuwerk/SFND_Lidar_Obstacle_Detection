@@ -1,5 +1,5 @@
-#ifndef EUCLIDEANCLUSTER_H_
-#define EUCLIDEANCLUSTER_H_
+#ifndef PLAYBACK_CLUSTER_H
+#define PLAYBACK_CLUSTER_H
 
 #include <chrono>
 #include <string>
@@ -15,4 +15,4 @@ namespace euclidianCluster {
     std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>> &points, kdTree::tree *tree, float distanceTol);
 }
 
-#endif /* EUCLIDEANCLUSTER_H_ */
+#endif /*PLAYBACK_CLUSTER_H*/

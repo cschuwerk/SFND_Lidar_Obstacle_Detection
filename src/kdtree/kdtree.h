@@ -1,5 +1,6 @@
-#ifndef KDTREE_H_
-#define KDTREE_H_
+#ifndef PLAYBACK_KDTREE_H
+#define PLAYBACK_KDTREE_H
+#include <utility>
 #include <vector>
 #include <iostream>
 #include <cmath>
@@ -7,24 +8,24 @@
 namespace kdTree {
 
     // Structure to represent node of kd tree
-    struct Node
+    struct node
     {
         std::vector<float> point;
         int id;
-        Node* left;
-        Node* right;
+        node* left;
+        node* right;
 
-        Node(std::vector<float> arr, int setId)
-                :	point(arr), id(setId), left(NULL), right(NULL)
+        node(std::vector<float> arr, int setId)
+                :	point(std::move(arr)), id(setId), left(nullptr), right(nullptr)
         {}
     };
 
     struct tree
     {
-        Node* root;
+        node* root;
 
         tree()
-                : root(NULL)
+                : root(nullptr)
         {}
 
 
@@ -32,8 +33,8 @@ namespace kdTree {
         void insert(std::vector<float> point, int id)
         {
             // the function should create a new node and place correctly with in the root
-            Node* n = new Node(point,id);
-            if(root == NULL) {
+            struct node* n = new node(std::move(point),id);
+            if(root == nullptr) {
                 root = n;
             }
             else {
@@ -44,17 +45,17 @@ namespace kdTree {
 
 
 
-        void insertNode(Node* &node, Node* &newNode, unsigned int depth) {
-            if(node == nullptr) {
-                node = newNode;
+        static void insertNode(node* &currNode, node* &newNode, unsigned int depth) {
+            if(currNode == nullptr) {
+                currNode = newNode;
             }
             else {
-                unsigned int i = depth%2; // 0 for x values, 1 for y values
-                if(newNode->point[i] < node->point[i]) {
-                    insertNode(node->left, newNode,++i);
+                unsigned int i = depth%3; // 0 for x values, 1 for y values, 2 for z values
+                if(newNode->point[i] < currNode->point[i]) {
+                    insertNode(currNode->left, newNode,++i);
                 }
                 else {
-                    insertNode(node->right, newNode,++i);
+                    insertNode(currNode->right, newNode,++i);
                 }
             }
         }
@@ -66,15 +67,13 @@ namespace kdTree {
         {
             std::vector<int> ids;
 
-            searchPoints(target, distanceTol, root, 0, ids);
+            searchPoints(std::move(target), distanceTol, root, 0, ids);
 
             return ids;
         }
 
 
-
-
-        void searchPoints(std::vector<float> target, float distanceTol, Node *node, unsigned int depth,
+        static void searchPoints(std::vector<float> target, float distanceTol, node *node, unsigned int depth,
                           std::vector<int> &ids)
         {
             if(node == nullptr) return;
@@ -82,17 +81,21 @@ namespace kdTree {
             // check if this point is within the boundary
             if(node->point[0] <= node->point[0]+distanceTol && node->point[0] >= node->point[0]-distanceTol) {
                 if(node->point[1] <= node->point[1]+distanceTol && node->point[1] >= node->point[1]-distanceTol) {
-                    if(sqrt( (node->point[0]-target[0])*(node->point[0]-target[0]) +  (node->point[1]-target[1])*(node->point[1]-target[1]) ) < distanceTol) {
-                        ids.push_back(node->id);
+                    if(node->point[2] <= node->point[2]+distanceTol && node->point[2] >= node->point[2]-distanceTol) {
+                        if (sqrt((node->point[0] - target[0]) * (node->point[0] - target[0]) +
+                                 (node->point[1] - target[1]) * (node->point[1] - target[1]) +
+                                 (node->point[2] - target[2]) * (node->point[2] - target[2])) < distanceTol) {
+                            ids.push_back(node->id);
+                        }
                     }
                 }
             }
 
-            // Check the childs only of their x/y component is within the distance tolerance
-            if(target[depth%2] - distanceTol <= node->point[depth%2]) {
+            // Check the childs only of their x/y/z component is within the distance tolerance
+            if(target[depth%3] - distanceTol <= node->point[depth%3]) {
                 searchPoints(target, distanceTol, node->left, depth + 1, ids);
             }
-            if(target[depth%2] + distanceTol >= node->point[depth%2]) {
+            if(target[depth%3] + distanceTol >= node->point[depth%3]) {
                 searchPoints(target, distanceTol, node->right, depth + 1, ids);
             }
 
@@ -102,4 +105,4 @@ namespace kdTree {
     };
 }
 
-#endif /* KDTREE_H_ */
+#endif /*PLAYBACK_KDTREE_H*/

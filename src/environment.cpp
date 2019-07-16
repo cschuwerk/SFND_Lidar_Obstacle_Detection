@@ -13,7 +13,7 @@ namespace lidarPerception {
     void perceptionPipeline(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointClouds<pcl::PointXYZI>* pcl_processor, const pcl::PointCloud<pcl::PointXYZI>::Ptr& pcl_data) {
 
         // Filter the PCL
-        pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud = pcl_processor->FilterCloud(pcl_data, 0.2 , Eigen::Vector4f (-10.0, -5.0, -3.0, 1), Eigen::Vector4f ( 30.0, 5.0, 5.0, 1));
+        pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud = pcl_processor->FilterCloud(pcl_data, 0.2 , Eigen::Vector4f (-5.0, -6.0, -3.0, 1), Eigen::Vector4f ( 20.0, 6.0, 5.0, 1));
 
         // Segment the street from the remainder
         std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr,pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentedCloud = pcl_processor->SegmentPlane(filterCloud, 100, 0.2);
