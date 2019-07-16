@@ -2,7 +2,7 @@
 
 void
 euclidianCluster::pointsInProximity(const std::vector<std::vector<float>> &points, int point, kdTree::tree *tree, float distanceTol,
-                  std::vector<int> &cluster, std::vector<bool> &pointProcessed) {
+                  std::vector<int> &cluster, std::vector<bool> &pointProcessed, int minSize, int maxSize) {
 
     //Get nearby points (including this point itself)
     std::vector<int> nearbyPoints = tree->search(points[point], distanceTol);
@@ -13,14 +13,14 @@ euclidianCluster::pointsInProximity(const std::vector<std::vector<float>> &point
 
         // If this point has not been processed yet, find all points in proximity
         if (!pointProcessed[index]) {
-            pointsInProximity(points, index, tree, distanceTol, cluster, pointProcessed);
+            pointsInProximity(points, index, tree, distanceTol, cluster, pointProcessed, minSize, maxSize);
         }
     }
 
 }
 
 std::vector<std::vector<int>>
-euclidianCluster::euclideanCluster(const std::vector<std::vector<float>> &points, kdTree::tree *tree, float distanceTol) {
+euclidianCluster::euclideanCluster(const std::vector<std::vector<float>> &points, kdTree::tree *tree, float distanceTol, int minSize, int maxSize) {
 
     std::vector<std::vector<int>> clusters;
     std::vector<bool> pointProcessed(points.size(), false);
@@ -28,7 +28,7 @@ euclidianCluster::euclideanCluster(const std::vector<std::vector<float>> &points
     for (unsigned int i = 0; i < points.size(); ++i) {
         if (!pointProcessed[i]) {
             std::vector<int> cluster;
-            pointsInProximity(points, i, tree, distanceTol, cluster, pointProcessed);
+            pointsInProximity(points, i, tree, distanceTol, cluster, pointProcessed, minSize, maxSize);
             clusters.push_back(cluster);
         }
     }
